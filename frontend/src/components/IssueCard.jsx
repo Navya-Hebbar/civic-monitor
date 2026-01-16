@@ -37,7 +37,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
     
     try {
       console.log('📤 Upvoting via API...', { issueId: issue.id });
-      await api.post(`/issues/${issueId}/upvote`);
+      await api.post(`/issues/${issue.id}/upvote`);
       
       console.log('✅ Upvote successful');
       
