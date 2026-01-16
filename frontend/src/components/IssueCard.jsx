@@ -129,7 +129,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
           onClick={handleUpvote}
           className="px-4 py-2 rounded-xl bg-indigo-100 hover:bg-indigo-200 font-bold"
         >
-          👍 {upvoteCount}
+          ↑ {upvoteCount}
         </button>
 
         <button
