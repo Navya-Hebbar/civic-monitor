@@ -64,7 +64,7 @@ const Explore = () => {
               onClick={fetchExploreFeed}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl font-black text-sm hover:from-purple-600 hover:to-pink-600 transition-all shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
             >
-              🔄 Refresh
+              Refresh
             </button>
           </div>
         </header>

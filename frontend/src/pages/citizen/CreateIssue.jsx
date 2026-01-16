@@ -5,59 +5,82 @@ import { useAuth } from '../../context/AuthContext';
 
 const CreateIssue = () => {
   const { user } = useAuth();
-  const [categories, setCategories] = useState([]);
-  const [formData, setFormData] = useState({ title: '', description: '', categoryId: '', localityId: '' });
+  const navigate = useNavigate();
+
+  // FORM
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    categoryId: '',
+    cityId: '',
+    zoneId: '',
+    localityId: '',
+  });
+
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  // Hardcoded localities (replace/add as needed)
-  const localities = [
-    { id: '2f466831-1067-4700-9429-a84ad7e06499', name: 'MG Road' },
-    { id: 'abcd1234-5678-90ef-ghij-1234567890ab', name: 'Brigade Road' },
-    { id: 'xyz98765-4321-0abc-def1-234567890abc', name: 'Koramangala' },
-  ];
+  // DROPDOWNS
+  const [categories, setCategories] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [zones, setZones] = useState([]);
+  const [localities, setLocalities] = useState([]);
 
-  // Fetch categories from backend
+  /* ------------------ AUTH CHECK ------------------ */
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const res = await api.get('/issues/categories');
-        setCategories(res.data);
-      } catch (err) {
-        console.error('❌ Failed to load categories:', err);
-        if (err.response?.status === 401) {
-          setError('Authentication required. Please login.');
-        } else {
-          setError('Failed to load categories. Please refresh the page.');
-        }
-      }
-    };
+    if (!user) navigate('/login');
+  }, [user, navigate]);
+
+  /* ------------------ FETCH INITIAL DATA ------------------ */
+  useEffect(() => {
     fetchCategories();
+    fetchCities();
   }, []);
 
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get('/issues/categories');
+      setCategories(res.data);
+    } catch {
+      setError('Failed to load categories');
+    }
+  };
+
+  const fetchCities = async () => {
+    try {
+      const res = await api.get('/geo/cities');
+      setCities(res.data);
+    } catch {
+      setError('Failed to load cities');
+    }
+  };
+
+  const fetchZones = async (cityId) => {
+    try {
+      const res = await api.get(`/geo/zones?cityId=${cityId}`);
+      setZones(res.data);
+      setLocalities([]);
+    } catch {
+      setError('Failed to load zones');
+    }
+  };
+
+  const fetchLocalities = async (zoneId) => {
+    try {
+      const res = await api.get(`/geo/localities?zoneId=${zoneId}`);
+      setLocalities(res.data);
+    } catch {
+      setError('Failed to load localities');
+    }
+  };
+
+  /* ------------------ SUBMIT ------------------ */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.categoryId) {
-      setError('Please select a category');
-      return;
-    }
-    if (!formData.localityId) {
-      setError('Please select a locality');
-      return;
-    }
-
-    if (!user || !user.id) {
-      setError('Please login to create issues.');
-      navigate('/login');
-      return;
-    }
-
-    if (user.id?.startsWith('demo-')) {
-      setError('Demo mode disabled. Please login with a real account.');
-      navigate('/login');
+    if (!formData.categoryId || !formData.localityId) {
+      setError('All fields are required');
       return;
     }
 
@@ -65,7 +88,6 @@ const CreateIssue = () => {
     setError('');
 
     try {
-      // Create issue
       const res = await api.post('/issues', {
         title: formData.title,
         description: formData.description,
@@ -73,137 +95,147 @@ const CreateIssue = () => {
         localityId: formData.localityId,
       });
 
-      // Upload media if file exists
       if (file && res.data.issueId) {
-        const mediaData = new FormData();
-        mediaData.append('file', file);
-        await api.post(`/issues/${res.data.issueId}/media`, mediaData, {
+        const media = new FormData();
+        media.append('file', file);
+
+        await api.post(`/issues/${res.data.issueId}/media`, media, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
       }
 
-      // Navigate to feed after success
       navigate('/feed');
     } catch (err) {
-      console.error('❌ Issue creation failed:', err);
-      if (err.response) {
-        const status = err.response.status;
-        const message = err.response.data?.message || err.response.data?.error || 'Unknown error';
-        setError(`Failed to create issue: ${message} (Status: ${status})`);
-      } else if (err.request) {
-        setError('Network error: Cannot reach server.');
-      } else {
-        setError('Failed to create issue. Please try again.');
-      }
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        'Issue creation failed';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-    }
-  }, [user, loading, navigate]);
-
+  /* ------------------ UI ------------------ */
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 via-pink-50 to-rose-50 py-12 px-4 relative overflow-hidden">
-      <div className="max-w-3xl mx-auto relative z-10">
-        <div className="text-center mb-10">
-          <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 mb-3">
-            Report an Issue
-          </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-100 px-4">
+      <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 bg-white/80 backdrop-blur-xl shadow-2xl rounded-3xl overflow-hidden">
+
+        {/* LEFT PAGE (BOOK STYLE) */}
+        <div className="hidden md:flex flex-col justify-center items-center bg-gradient-to-br from-indigo-600 to-purple-700 text-white p-10">
+          <h2 className="text-4xl font-bold mb-4">Report Issues</h2>
+          <p className="opacity-80 text-center">
+            Your voice helps improve your city.
+          </p>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl p-8 md:p-12 border-2 border-indigo-200/50 relative overflow-hidden">
-          <div className="relative z-10">
-            {error && <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl text-yellow-800">{error}</div>}
+        {/* RIGHT PAGE (FORM) */}
+        <div className="p-8">
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+              {error}
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Issue Title *</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  placeholder="e.g., Broken street light on Main Street"
-                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-gray-200 focus:border-indigo-500 focus:bg-white"
-                  required
-                />
-              </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
 
-              {/* Category */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Category *</label>
-                <select
-                  value={formData.categoryId}
-                  onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
-                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-gray-200"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name} {cat.department ? `(${cat.department})` : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <input
+              type="text"
+              placeholder="Issue title"
+              className="w-full p-3 rounded-xl border"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
+              required
+            />
 
-              {/* Locality */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Locality *</label>
-                <select
-                  value={formData.localityId}
-                  onChange={(e) => setFormData({ ...formData, localityId: e.target.value })}
-                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-gray-200"
-                  required
-                >
-                  <option value="">Select a locality</option>
-                  {localities.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <textarea
+              placeholder="Describe the issue"
+              rows={4}
+              className="w-full p-3 rounded-xl border"
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              required
+            />
 
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Description *</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Provide detailed information about the issue..."
-                  rows={6}
-                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-gray-200"
-                  required
-                />
-              </div>
+            <select
+              className="w-full p-3 rounded-xl border"
+              value={formData.categoryId}
+              onChange={(e) =>
+                setFormData({ ...formData, categoryId: e.target.value })
+              }
+              required
+            >
+              <option value="">Select Category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
 
-              {/* File Upload */}
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Upload Photo/Video (Optional)</label>
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  onChange={(e) => setFile(e.target.files[0])}
-                  className="w-full p-4 rounded-xl bg-gray-50 border-2 border-dashed border-gray-300"
-                />
-                {file && <p className="mt-2 text-sm text-gray-600">Selected: {file.name}</p>}
-              </div>
+            <select
+              className="w-full p-3 rounded-xl border"
+              value={formData.cityId}
+              onChange={(e) => {
+                setFormData({ ...formData, cityId: e.target.value, zoneId: '', localityId: '' });
+                fetchZones(e.target.value);
+              }}
+              required
+            >
+              <option value="">Select City</option>
+              {cities.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white rounded-2xl font-black text-xl"
-              >
-                {loading ? 'Submitting...' : 'Submit Report'}
-              </button>
-            </form>
-          </div>
+            <select
+              className="w-full p-3 rounded-xl border"
+              value={formData.zoneId}
+              onChange={(e) => {
+                setFormData({ ...formData, zoneId: e.target.value, localityId: '' });
+                fetchLocalities(e.target.value);
+              }}
+              required
+            >
+              <option value="">Select Zone</option>
+              {zones.map((z) => (
+                <option key={z.id} value={z.id}>{z.name}</option>
+              ))}
+            </select>
+
+            <select
+              className="w-full p-3 rounded-xl border"
+              value={formData.localityId}
+              onChange={(e) =>
+                setFormData({ ...formData, localityId: e.target.value })
+              }
+              required
+            >
+              <option value="">Select Locality</option>
+              {localities.map((l) => (
+                <option key={l.id} value={l.id}>{l.name}</option>
+              ))}
+            </select>
+
+            <input
+              type="file"
+              accept="image/*,video/*"
+              onChange={(e) => setFile(e.target.files[0])}
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold"
+            >
+              {loading ? 'Submitting...' : 'Submit Issue'}
+            </button>
+
+          </form>
         </div>
       </div>
     </div>
