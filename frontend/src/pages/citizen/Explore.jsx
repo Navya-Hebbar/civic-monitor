@@ -10,19 +10,29 @@ const Explore = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const fetchExploreFeed = async () => {
-    try {
-      const { data } = await api.get('/issues/explore'); 
-      const apiIssues = Array.isArray(data) ? data : [];
-      setIssues(apiIssues);
-      setFilteredIssues(apiIssues);
-    } catch (err) {
-      console.error("❌ Explore feed error:", err);
-      setIssues([]);
-      setFilteredIssues([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    const { data } = await api.get('/issues/explore');
+
+    const apiIssues = Array.isArray(data)
+      ? data.map((issue) => ({
+          ...issue,
+          // ✅ map backend count to frontend expected field
+          upvoteCount: issue?._count?.upvotes ?? 0,
+          commentCount: issue?._count?.comments ?? 0,
+        }))
+      : [];
+
+    setIssues(apiIssues);
+    setFilteredIssues(apiIssues);
+  } catch (err) {
+    console.error("❌ Explore feed error:", err);
+    setIssues([]);
+    setFilteredIssues([]);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchExploreFeed();
@@ -98,7 +108,7 @@ const Explore = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredIssues.map((issue, index) => (
               <div 
-                key={issue.issueId} 
+                key={issue.id} 
                 className="group transition-all duration-500 transform hover:scale-105"
                 style={{ animationDelay: `${index * 50}ms` }}
               >

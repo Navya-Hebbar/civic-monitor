@@ -14,19 +14,24 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
+  /* ===================== FETCH COMMENTS INIT ===================== */
   useEffect(() => {
     api
       .get(`/issues/${issue.id}/comments`)
       .then((res) => {
-        if (Array.isArray(res.data)) setComments(res.data);
+        if (Array.isArray(res.data)) {
+          setComments(res.data);
+        }
       })
       .catch(() => {});
   }, [issue.id]);
 
+  /* ===================== SYNC UPVOTE COUNT ===================== */
   useEffect(() => {
     setUpvoteCount(issue.upvoteCount || 0);
-  }, [issue]);
+  }, [issue.upvoteCount]);
 
+  /* ===================== STATUS COLOR ===================== */
   const getStatusColor = (status) => {
     const colors = {
       OPEN: 'bg-blue-100 text-blue-700 border-blue-200',
@@ -37,19 +42,31 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
     return colors[status] || colors.OPEN;
   };
 
+  /* ===================== HANDLE UPVOTE ===================== */
   const handleUpvote = async () => {
-    if (!user?.id) return alert('Please login to upvote');
+    if (!user?.id) {
+      alert('Please login to upvote');
+      return;
+    }
 
     try {
-      await api.post(`/issues/${issue.id}/upvote`);
-      setUpvoted(!upvoted);
-      setUpvoteCount((prev) => (upvoted ? prev - 1 : prev + 1));
+      const res = await api.post(
+        `/issues/${issue.id}/upvote`,
+        {},
+        { withCredentials: true }
+      );
+
+      setUpvoteCount(res.data._count?.upvotes ?? upvoteCount); // fallback to current count
+    setUpvoted(res.data.hasUpvoted ?? !upvoted);
+
       onRefresh?.();
-    } catch {
-      alert('Upvote failed');
+    } catch (err) {
+      console.error('Upvote failed', err);
+      alert('Failed to toggle upvote');
     }
   };
 
+  /* ===================== FETCH COMMENTS ===================== */
   const fetchComments = async () => {
     try {
       const { data } = await api.get(`/issues/${issue.id}/comments`);
@@ -59,10 +76,15 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
     }
   };
 
+  /* ===================== ADD COMMENT ===================== */
   const handleAddComment = async (e) => {
     e.preventDefault();
+
     if (!newComment.trim()) return;
-    if (!user?.id) return alert('Login required');
+    if (!user?.id) {
+      alert('Login required');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -71,16 +93,18 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
         { content: newComment },
         { withCredentials: true }
       );
+
       setNewComment('');
       fetchComments();
       onRefresh?.();
-    } catch {
+    } catch (err) {
       alert('Failed to add comment');
     } finally {
       setLoading(false);
     }
   };
 
+  /* ===================== MEDIA ===================== */
   const media = issue.media || [];
   const currentMedia = media[mediaIndex];
 
@@ -92,7 +116,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
   return (
     <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition border border-gray-200 overflow-hidden">
 
-      {/* HEADER (like IG post header) */}
+      {/* HEADER */}
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-sm">
@@ -100,10 +124,17 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
           </div>
           <div>
             <p className="text-sm font-semibold text-gray-900">{authorName}</p>
-            <p className="text-xs text-gray-500">{new Date(issue.createdAt).toLocaleDateString()}</p>
+            <p className="text-xs text-gray-500">
+              {new Date(issue.createdAt).toLocaleDateString()}
+            </p>
           </div>
         </div>
-        <span className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusColor(issue.status)}`}>
+
+        <span
+          className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusColor(
+            issue.status
+          )}`}
+        >
           {issue.status}
         </span>
       </div>
@@ -114,7 +145,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
         <p className="text-sm text-gray-500">{issue.locality}</p>
       </div>
 
-      {/* MEDIA (like IG post) */}
+      {/* MEDIA */}
       {currentMedia && (
         <div className="w-full bg-gray-100">
           {currentMedia.type === 'VIDEO' ? (
@@ -133,12 +164,14 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
         </div>
       )}
 
-      {/* ACTIONS (like IG buttons) */}
+      {/* ACTIONS */}
       <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-200">
         <button
           onClick={handleUpvote}
           className={`flex items-center gap-1 px-3 py-1 rounded-full font-semibold transition ${
-            upvoted ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            upvoted
+              ? 'bg-pink-100 text-pink-600'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
         >
           ↑ {upvoteCount}
@@ -169,8 +202,10 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
                 <div className="bg-gray-100 rounded-2xl p-2 flex-1">
                   <p className="text-sm">{c.content}</p>
                   <p className="text-xs text-gray-500 mt-1">
-                    {c.user?.fullName || c.user?.email?.split('@')[0] || 'Anonymous'} •{' '}
-                    {new Date(c.createdAt).toLocaleString()}
+                    {c.user?.fullName ||
+                      c.user?.email?.split('@')[0] ||
+                      'Anonymous'}{' '}
+                    • {new Date(c.createdAt).toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -186,7 +221,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
             />
             <button
               disabled={loading}
-              className="px-4 py-2 rounded-full bg-pink-500 text-white font-bold hover:bg-pink-600 transition"
+              className="px-4 py-2 rounded-full bg-pink-500 text-white font-bold hover:bg-pink-600 transition disabled:opacity-50"
             >
               Post
             </button>
