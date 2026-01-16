@@ -155,7 +155,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
 
                 {/* ---------------- FIX #2: correct author field ---------------- */}
                 <p className="text-xs text-gray-500">
-                  {c.user?.name || c.user?.email?.split('@')[0] || 'Anonymous'} •{' '}
+                  {c.user?.fullName || c.user?.email?.split('@')[0] || 'Anonymous'} •{' '}
                   {new Date(c.createdAt).toLocaleString()}
                 </p>
               </div>
