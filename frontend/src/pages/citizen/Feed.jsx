@@ -54,23 +54,26 @@ const Feed = () => {
   ];
 
   return (
-    <div className="pt-24 min-h-screen bg-gradient-to-br from-indigo-50 via-white via-pink-50 to-purple-50 pb-40 relative overflow-hidden">
+    <div className="pt-24 min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 pb-40 relative overflow-hidden font-sans">
 
       {/* HEADER */}
       <div className="max-w-5xl mx-auto px-6 mb-10">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900">
+            <h1
+              className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight"
+              style={{ fontFamily: "'Instagram Sans', 'Helvetica Neue', sans-serif" }}
+            >
               My Locality Feed
             </h1>
-            <p className="text-indigo-600 font-semibold text-sm mt-1">
+            <p className="text-pink-500 font-semibold text-sm mt-1 tracking-wide">
               {user?.localityName || user?.locality?.name || "Community Updates"}
             </p>
           </div>
 
           <button
             onClick={fetchFeed}
-            className="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition shadow-md"
+            className="px-6 py-2 bg-gradient-to-r from-pink-500 to-purple-500 text-white font-bold rounded-full hover:scale-105 transform transition shadow-md"
           >
             Refresh
           </button>
@@ -81,10 +84,10 @@ const Feed = () => {
           {summaryCards.map((card, idx) => (
             <div
               key={idx}
-              className="min-w-[180px] bg-white/40 backdrop-blur-md border border-white/30 rounded-2xl p-5 shadow-lg flex flex-col items-center justify-center hover:shadow-xl transition cursor-pointer"
+              className="min-w-[180px] bg-white/60 backdrop-blur-md border border-white/30 rounded-3xl p-5 shadow-lg flex flex-col items-center justify-center hover:shadow-2xl transition cursor-pointer"
             >
-              <span className="text-2xl font-bold text-gray-900">{card.value}</span>
-              <span className="text-gray-700 mt-1">{card.title}</span>
+              <span className="text-3xl font-bold text-gray-900 tracking-wide">{card.value}</span>
+              <span className="text-gray-600 mt-1 text-sm font-semibold">{card.title}</span>
             </div>
           ))}
         </div>
@@ -96,7 +99,7 @@ const Feed = () => {
           issues.map((issue, index) => (
             <div
               key={issue.issueId || index}
-              className="bg-white/30 backdrop-blur-md rounded-2xl p-6 shadow-lg hover:shadow-xl transition cursor-pointer border border-white/20"
+              className="bg-white/50 backdrop-blur-md rounded-3xl p-6 shadow-lg hover:shadow-2xl transition cursor-pointer border border-white/20"
             >
               <IssueCard
                 issue={issue}
@@ -106,14 +109,14 @@ const Feed = () => {
             </div>
           ))
         ) : (
-          <div className="col-span-full text-center py-20 bg-white/30 backdrop-blur-md rounded-2xl border border-white/20 shadow-lg">
-            <h3 className="text-3xl font-bold text-gray-800 mb-3">
+          <div className="col-span-full text-center py-20 bg-white/50 backdrop-blur-md rounded-3xl border border-white/20 shadow-lg">
+            <h3 className="text-3xl font-bold text-gray-900 mb-3 tracking-tight">
               All Clear!
             </h3>
-            <p className="text-gray-700">
+            <p className="text-gray-700 text-lg">
               No active issues in your locality.
               <br />
-              <span className="text-indigo-500 font-medium">Enjoy the calm ✨</span>
+              <span className="text-pink-500 font-semibold">Enjoy the calm ✨</span>
             </p>
           </div>
         )}

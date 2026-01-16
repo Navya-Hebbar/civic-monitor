@@ -14,7 +14,6 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  /* ---------------- FIX #1: preload comments for count ---------------- */
   useEffect(() => {
     api
       .get(`/issues/${issue.id}/comments`)
@@ -91,43 +90,56 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
     'Anonymous';
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl p-6 border hover:shadow-2xl transition">
+    <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition border border-gray-200 overflow-hidden">
 
-      {/* HEADER */}
-      <div className="mb-4">
+      {/* HEADER (like IG post header) */}
+      <div className="flex items-center justify-between p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-sm">
+            {authorName.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-gray-900">{authorName}</p>
+            <p className="text-xs text-gray-500">{new Date(issue.createdAt).toLocaleDateString()}</p>
+          </div>
+        </div>
         <span className={`px-3 py-1 text-xs font-bold rounded-full border ${getStatusColor(issue.status)}`}>
           {issue.status}
         </span>
-
-        <h3 className="text-2xl font-black text-gray-900 mt-2">
-          {issue.title}
-        </h3>
-
-        <p className="text-sm text-gray-500">
-          {issue.locality} • {new Date(issue.createdAt).toLocaleDateString()}
-        </p>
-
-        <p className="text-sm font-semibold text-gray-600">
-          Reported by <span className="text-indigo-600">{authorName}</span>
-        </p>
       </div>
 
-      {/* MEDIA */}
+      {/* TITLE */}
+      <div className="px-4 pb-2">
+        <h3 className="text-lg font-bold text-gray-900">{issue.title}</h3>
+        <p className="text-sm text-gray-500">{issue.locality}</p>
+      </div>
+
+      {/* MEDIA (like IG post) */}
       {currentMedia && (
-        <div className="rounded-xl overflow-hidden mb-4">
+        <div className="w-full bg-gray-100">
           {currentMedia.type === 'VIDEO' ? (
-            <video src={currentMedia.url} controls />
+            <video
+              src={currentMedia.url}
+              controls
+              className="w-full max-h-[400px] object-cover"
+            />
           ) : (
-            <img src={currentMedia.url} alt="issue" className="w-full h-56 object-cover" />
+            <img
+              src={currentMedia.url}
+              alt="issue"
+              className="w-full max-h-[400px] object-cover"
+            />
           )}
         </div>
       )}
 
-      {/* ACTIONS */}
-      <div className="flex items-center gap-4">
+      {/* ACTIONS (like IG buttons) */}
+      <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-200">
         <button
           onClick={handleUpvote}
-          className="px-4 py-2 rounded-xl bg-indigo-100 hover:bg-indigo-200 font-bold"
+          className={`flex items-center gap-1 px-3 py-1 rounded-full font-semibold transition ${
+            upvoted ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
         >
           ↑ {upvoteCount}
         </button>
@@ -137,7 +149,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
             setShowComments(!showComments);
             if (!showComments) fetchComments();
           }}
-          className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 font-bold"
+          className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition"
         >
           💬 Comments {comments.length > 0 && `(${comments.length})`}
         </button>
@@ -145,33 +157,36 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
 
       {/* COMMENTS */}
       {showComments && (
-        <div className="mt-4 border-t pt-4 space-y-3">
+        <div className="px-4 py-3 space-y-3">
           {comments.length === 0 ? (
             <p className="text-gray-400 text-sm text-center">No comments yet</p>
           ) : (
             comments.map((c) => (
-              <div key={c.id} className="bg-gray-50 p-3 rounded-lg">
-                <p className="text-sm">{c.content}</p>
-
-                {/* ---------------- FIX #2: correct author field ---------------- */}
-                <p className="text-xs text-gray-500">
-                  {c.user?.fullName || c.user?.email?.split('@')[0] || 'Anonymous'} •{' '}
-                  {new Date(c.createdAt).toLocaleString()}
-                </p>
+              <div key={c.id} className="flex gap-2">
+                <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-xs">
+                  {c.user?.fullName?.charAt(0)?.toUpperCase() || 'A'}
+                </div>
+                <div className="bg-gray-100 rounded-2xl p-2 flex-1">
+                  <p className="text-sm">{c.content}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {c.user?.fullName || c.user?.email?.split('@')[0] || 'Anonymous'} •{' '}
+                    {new Date(c.createdAt).toLocaleString()}
+                  </p>
+                </div>
               </div>
             ))
           )}
 
-          <form onSubmit={handleAddComment} className="flex gap-2">
+          <form onSubmit={handleAddComment} className="flex gap-2 mt-2">
             <input
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-1 border rounded-xl px-4 py-2"
+              className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-pink-500"
             />
             <button
               disabled={loading}
-              className="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold"
+              className="px-4 py-2 rounded-full bg-pink-500 text-white font-bold hover:bg-pink-600 transition"
             >
               Post
             </button>
