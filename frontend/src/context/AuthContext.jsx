@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data } = await api.get("/auth/me", { withCredentials: true });
+        const { data } = await api.get("/users/me", { withCredentials: true });
         setUser(data);
         localStorage.setItem("user", JSON.stringify(data)); // save user
       } catch {
