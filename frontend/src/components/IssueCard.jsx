@@ -31,6 +31,21 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
     setUpvoteCount(issue.upvoteCount || 0);
   }, [issue.upvoteCount]);
 
+  /* ===================== 🔧 FIX: SYNC UPVOTED STATE ===================== */
+  useEffect(() => {
+    if (!user?.id) return;
+
+    // If backend sends boolean
+    if (typeof issue.hasUpvoted === 'boolean') {
+      setUpvoted(issue.hasUpvoted);
+    }
+
+    // If backend sends list of userIds
+    if (Array.isArray(issue.upvotedBy)) {
+      setUpvoted(issue.upvotedBy.includes(user.id));
+    }
+  }, [issue, user?.id]);
+
   /* ===================== STATUS COLOR ===================== */
   const getStatusColor = (status) => {
     const colors = {
@@ -44,27 +59,36 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
 
   /* ===================== HANDLE UPVOTE ===================== */
   const handleUpvote = async () => {
-    if (!user?.id) {
-      alert('Please login to upvote');
-      return;
-    }
+  if (!user?.id) {
+    alert('Please login to upvote');
+    return;
+  }
 
-    try {
-      const res = await api.post(
-        `/issues/${issue.id}/upvote`,
-        {},
-        { withCredentials: true }
-      );
+  try {
+    const res = await api.post(
+      `/issues/${issue.id}/upvote`,
+      {},
+      { withCredentials: true }
+    );
 
-      setUpvoteCount(res.data._count?.upvotes ?? upvoteCount);
-      setUpvoted(res.data.hasUpvoted ?? !upvoted);
+    const hasUpvoted =
+      res.data.hasUpvoted !== undefined
+        ? res.data.hasUpvoted
+        : !upvoted;
 
-      onRefresh?.();
-    } catch (err) {
-      console.error('Upvote failed', err);
-      alert('Failed to toggle upvote');
-    }
-  };
+    setUpvoted(hasUpvoted);
+
+    setUpvoteCount((prev) =>
+      hasUpvoted ? prev + 1 : Math.max(prev - 1, 0)
+    );
+
+    onRefresh?.();
+  } catch (err) {
+    console.error('Upvote failed', err);
+    alert('Failed to toggle upvote');
+  }
+};
+
 
   /* ===================== FETCH COMMENTS ===================== */
   const fetchComments = async () => {
