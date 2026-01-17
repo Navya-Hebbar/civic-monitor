@@ -93,7 +93,6 @@ const Signup = () => {
       const res = await api.post("/auth/signup", formData);
       console.log("✅ Signup successful");
 
-      // Store token if backend sends it
       const token =
         res.data?.token ||
         res.data?.accessToken ||
@@ -104,7 +103,6 @@ const Signup = () => {
         localStorage.setItem("token", token);
       }
 
-      // ✅ DO NOT call login()
       navigate("/feed", { replace: true });
     } catch (err) {
       console.error("Signup failed:", err);
@@ -121,11 +119,14 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white shadow-xl rounded-2xl p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 sm:px-6">
+      <div className="w-full max-w-md sm:max-w-lg bg-white shadow-xl rounded-2xl p-6 sm:p-8">
+
         <div className="text-center mb-6">
           <div className="text-4xl mb-2">🏛️</div>
-          <h2 className="text-3xl font-bold text-gray-800">Civic Monitor</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Civic Monitor
+          </h2>
           <p className="text-gray-500 text-sm">
             Create your citizen account
           </p>
@@ -146,7 +147,7 @@ const Signup = () => {
             onChange={(e) =>
               setFormData({ ...formData, fullName: e.target.value })
             }
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-3 text-sm sm:text-base"
           />
 
           <input
@@ -157,7 +158,7 @@ const Signup = () => {
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-3 text-sm sm:text-base"
           />
 
           <input
@@ -168,14 +169,14 @@ const Signup = () => {
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-3 text-sm sm:text-base"
           />
 
           <select
             required
             value={formData.cityId}
             onChange={(e) => handleCityChange(e.target.value)}
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-3 text-sm sm:text-base"
           >
             <option value="">Select City</option>
             {geo.cities.map((c) => (
@@ -190,7 +191,7 @@ const Signup = () => {
             disabled={!formData.cityId}
             value={formData.zoneId}
             onChange={(e) => handleZoneChange(e.target.value)}
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-3 text-sm sm:text-base"
           >
             <option value="">Select Zone</option>
             {geo.zones.map((z) => (
@@ -207,7 +208,7 @@ const Signup = () => {
             onChange={(e) =>
               setFormData({ ...formData, localityId: e.target.value })
             }
-            className="w-full border rounded-lg px-4 py-2"
+            className="w-full border rounded-lg px-4 py-3 text-sm sm:text-base"
           >
             <option value="">Select Locality</option>
             {geo.localities.map((l) => (
@@ -220,7 +221,7 @@ const Signup = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
+            className="w-full bg-indigo-600 text-white py-3 sm:py-3.5 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>

@@ -56,8 +56,8 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
         { withCredentials: true }
       );
 
-      setUpvoteCount(res.data._count?.upvotes ?? upvoteCount); // fallback to current count
-    setUpvoted(res.data.hasUpvoted ?? !upvoted);
+      setUpvoteCount(res.data._count?.upvotes ?? upvoteCount);
+      setUpvoted(res.data.hasUpvoted ?? !upvoted);
 
       onRefresh?.();
     } catch (err) {
@@ -117,9 +117,9 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
     <div className="bg-white rounded-2xl shadow-md hover:shadow-xl transition border border-gray-200 overflow-hidden">
 
       {/* HEADER */}
-      <div className="flex items-center justify-between p-4">
+      <div className="flex items-center justify-between p-4 sm:p-5">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-sm">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold text-sm">
             {authorName.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -140,9 +140,11 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
       </div>
 
       {/* TITLE */}
-      <div className="px-4 pb-2">
-        <h3 className="text-lg font-bold text-gray-900">{issue.title}</h3>
-        <p className="text-sm text-gray-500">{issue.locality}</p>
+      <div className="px-4 sm:px-5 pb-2">
+        <h3 className="text-base sm:text-lg font-bold text-gray-900">
+          {issue.title}
+        </h3>
+        <p className="text-xs sm:text-sm text-gray-500">{issue.locality}</p>
       </div>
 
       {/* MEDIA */}
@@ -152,23 +154,23 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
             <video
               src={currentMedia.url}
               controls
-              className="w-full max-h-[400px] object-cover"
+              className="w-full max-h-[300px] sm:max-h-[400px] object-cover"
             />
           ) : (
             <img
               src={currentMedia.url}
               alt="issue"
-              className="w-full max-h-[400px] object-cover"
+              className="w-full max-h-[300px] sm:max-h-[400px] object-cover"
             />
           )}
         </div>
       )}
 
       {/* ACTIONS */}
-      <div className="flex items-center gap-4 px-4 py-3 border-b border-gray-200">
+      <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-5 py-3 border-b border-gray-200">
         <button
           onClick={handleUpvote}
-          className={`flex items-center gap-1 px-3 py-1 rounded-full font-semibold transition ${
+          className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold transition ${
             upvoted
               ? 'bg-pink-100 text-pink-600'
               : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -182,7 +184,7 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
             setShowComments(!showComments);
             if (!showComments) fetchComments();
           }}
-          className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition"
+          className="flex items-center gap-1 px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm font-semibold hover:bg-gray-200 transition"
         >
           💬 Comments {comments.length > 0 && `(${comments.length})`}
         </button>
@@ -190,9 +192,11 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
 
       {/* COMMENTS */}
       {showComments && (
-        <div className="px-4 py-3 space-y-3">
+        <div className="px-4 sm:px-5 py-3 space-y-3">
           {comments.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center">No comments yet</p>
+            <p className="text-gray-400 text-sm text-center">
+              No comments yet
+            </p>
           ) : (
             comments.map((c) => (
               <div key={c.id} className="flex gap-2">
@@ -217,11 +221,11 @@ const IssueCard = ({ issue, isCreator, onRefresh }) => {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Add a comment..."
-              className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-1 focus:ring-pink-500"
+              className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-pink-500"
             />
             <button
               disabled={loading}
-              className="px-4 py-2 rounded-full bg-pink-500 text-white font-bold hover:bg-pink-600 transition disabled:opacity-50"
+              className="px-4 py-2 rounded-full bg-pink-500 text-white text-sm font-bold hover:bg-pink-600 transition disabled:opacity-50"
             >
               Post
             </button>

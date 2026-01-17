@@ -4,17 +4,23 @@ import api from "../api/axios";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  // ✅ Initialize from localStorage to survive page refresh
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const [loading, setLoading] = useState(true);
 
-  // Check auth on refresh
+  // ✅ Check auth on mount (refresh)
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data } = await api.get("/auth/me");
+        const { data } = await api.get("/auth/me", { withCredentials: true });
         setUser(data);
+        localStorage.setItem("user", JSON.stringify(data)); // save user
       } catch {
         setUser(null);
+        localStorage.removeItem("user"); // remove if not authenticated
       } finally {
         setLoading(false);
       }
@@ -22,9 +28,15 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  // ✅ Logout
   const logout = async () => {
-    await api.delete("/auth/logout");
+    try {
+      await api.delete("/auth/logout", { withCredentials: true });
+    } catch (err) {
+      console.error("Logout failed:", err);
+    }
     setUser(null);
+    localStorage.removeItem("user");
   };
 
   return (

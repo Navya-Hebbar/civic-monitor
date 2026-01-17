@@ -2,8 +2,8 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Login from "./pages/auth/Login";
 import Signup from "./pages/auth/Signup";
 import Feed from "./pages/citizen/Feed";
-import CreateIssue from "./pages/citizen/CreateIssue";
 import Explore from "./pages/citizen/Explore";
+import CreateIssue from "./pages/citizen/CreateIssue";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Navbar from "./components/Navbar";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -11,10 +11,13 @@ import { useAuth } from "./context/AuthContext";
 
 function App() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   const authPaths = ["/login", "/signup"];
   const showNavbar = user && !authPaths.includes(location.pathname);
+
+  // ✅ Show loader while checking auth
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -48,16 +51,12 @@ function App() {
         {/* Admin */}
         <Route
           path="/admin"
-          element={
-            <ProtectedRoute adminOnly>
-              <AdminDashboard />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>}
         />
 
         {/* Fallback */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/feed" replace />} />
+        <Route path="*" element={<Navigate to="/feed" replace />} />
       </Routes>
     </div>
   );

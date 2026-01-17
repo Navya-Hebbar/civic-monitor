@@ -78,8 +78,8 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-5xl grid md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 sm:px-6">
+      <div className="w-full max-w-md sm:max-w-xl md:max-w-5xl grid md:grid-cols-2 bg-white rounded-2xl shadow-xl overflow-hidden">
 
         {/* LEFT – SVG CIVIC ANIMATION */}
         <div className="hidden md:flex items-center justify-center bg-indigo-50 p-10">
@@ -161,8 +161,8 @@ const Login = () => {
         </div>
 
         {/* RIGHT – LOGIN FORM */}
-        <div className="p-10">
-          <h2 className="text-3xl font-bold text-gray-900 mb-1">
+        <div className="p-6 sm:p-8 md:p-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">
             Civic Monitor
           </h2>
           <p className="text-gray-500 text-sm mb-6">
@@ -209,7 +209,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+              className="w-full py-3 sm:py-3.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
