@@ -1,7 +1,7 @@
 .create-page {
   min-height: 100vh;
   background-color: #f3f2ef;
-  padding: 24px;
+  padding: 32px 16px;
 }
 
 .create-container {
@@ -12,43 +12,50 @@
 .create-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 24px;
+  border-radius: 10px;
+  padding: 28px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
+
+/* ---------- HEADERS ---------- */
 
 .create-title {
   font-size: 20px;
   font-weight: 600;
   color: #111827;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
 .create-subtitle {
   font-size: 14px;
   color: #6b7280;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
+
+/* ---------- ERROR ---------- */
 
 .create-error {
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #b91c1c;
-  padding: 10px;
+  padding: 12px;
   border-radius: 6px;
   font-size: 13px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
+
+/* ---------- FORM ---------- */
 
 .create-form {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .create-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .create-field label {
@@ -57,46 +64,93 @@
   color: #374151;
 }
 
+/* Inputs */
+
 .create-field input,
 .create-field textarea,
 .create-field select {
-  padding: 10px 12px;
+  padding: 11px 12px;
   border: 1px solid #d1d5db;
   border-radius: 6px;
   font-size: 14px;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .create-field textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 90px;
 }
+
+/* Focus */
 
 .create-field input:focus,
 .create-field textarea:focus,
 .create-field select:focus {
   outline: none;
   border-color: #0a66c2;
+  box-shadow: 0 0 0 2px rgba(10, 102, 194, 0.15);
 }
 
-.create-file {
+/* ---------- FILE INPUT ---------- */
+
+.create-field input[type="file"] {
   font-size: 13px;
+  padding: 8px 0;
+  border: none;
 }
+
+/* ---------- PREVIEWS ---------- */
+
+.create-previews {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.preview-item {
+  width: 76px;
+  height: 76px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  position: relative;
+}
+
+.preview-item img,
+.preview-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ---------- ACTIONS ---------- */
 
 .create-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 8px;
+  margin-top: 20px;
 }
 
 .create-submit {
-  padding: 10px 16px;
+  padding: 10px 18px;
   background-color: #0a66c2;
   color: white;
   font-size: 14px;
   font-weight: 600;
   border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.create-submit:hover {
+  background-color: #004182;
 }
 
 .create-submit:disabled {
   opacity: 0.6;
+  cursor: not-allowed;
 }

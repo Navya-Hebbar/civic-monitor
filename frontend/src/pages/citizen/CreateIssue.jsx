@@ -17,7 +17,7 @@ const CreateIssue = () => {
     localityId: "",
   });
 
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]); // ✅ FIXED
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -31,7 +31,6 @@ const CreateIssue = () => {
       navigate("/login");
       return;
     }
-
     fetchInitialData();
   }, [user, navigate]);
 
@@ -41,7 +40,6 @@ const CreateIssue = () => {
         api.get("/issues/categories", { withCredentials: true }),
         api.get("/geo/cities", { withCredentials: true }),
       ]);
-
       setCategories(catRes.data);
       setCities(cityRes.data);
     } catch {
@@ -50,29 +48,22 @@ const CreateIssue = () => {
   };
 
   const fetchZones = async (cityId) => {
-    const { data } = await api.get(
-      `/geo/zones?cityId=${cityId}`,
-      { withCredentials: true }
-    );
+    const { data } = await api.get(`/geo/zones?cityId=${cityId}`, {
+      withCredentials: true,
+    });
     setZones(data);
     setLocalities([]);
   };
 
   const fetchLocalities = async (zoneId) => {
-    const { data } = await api.get(
-      `/geo/localities?zoneId=${zoneId}`,
-      { withCredentials: true }
-    );
+    const { data } = await api.get(`/geo/localities?zoneId=${zoneId}`, {
+      withCredentials: true,
+    });
     setLocalities(data);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!user) {
-      setError("User not authenticated");
-      return;
-    }
 
     if (!formData.categoryId || !formData.localityId) {
       setError("All fields are required");
@@ -83,7 +74,6 @@ const CreateIssue = () => {
     setError("");
 
     try {
-      // 1️⃣ Create issue
       const res = await api.post(
         "/issues",
         {
@@ -96,35 +86,24 @@ const CreateIssue = () => {
       );
 
       const issueId = res.data?.issueId;
+      if (!issueId) throw new Error("Issue ID missing");
 
-      if (!issueId) {
-        throw new Error("Issue ID not returned");
-      }
-
-      // 2️⃣ Upload media (optional)
-      if (file) {
+      // ✅ MULTI FILE UPLOAD
+      for (const file of files) {
         const media = new FormData();
         media.append("file", file);
 
-        await api.post(
-          `/issues/${issueId}/media`,
-          media,
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "multipart/form-data",
-            },
-          }
-        );
+        await api.post(`/issues/${issueId}/media`, media, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        });
       }
 
       navigate("/feed");
     } catch (err) {
-      console.error("Issue creation failed:", err);
-
       setError(
         err.response?.data?.message ||
-        "Issue creation failed. Please try again."
+          "Issue creation failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -136,133 +115,138 @@ const CreateIssue = () => {
       <div className="create-container">
         <div className="create-card">
           <h1 className="create-title">Report an issue</h1>
-          <p className="create-subtitle">
-            Submit a civic issue in your locality for action
-          </p>
 
           {error && <div className="create-error">{error}</div>}
 
-          <form className="create-form" onSubmit={handleSubmit}>
-            <div className="create-field">
-              <label>Issue title</label>
-              <input
-                required
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData({ ...formData, title: e.target.value })
-                }
-              />
-            </div>
+<form className="create-form" onSubmit={handleSubmit}>
+  <div className="create-field">
+    <label>Issue title</label>
+    <input
+      required
+      value={formData.title}
+      onChange={(e) =>
+        setFormData({ ...formData, title: e.target.value })
+      }
+    />
+  </div>
 
-            <div className="create-field">
-              <label>Description</label>
-              <textarea
-                required
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-            </div>
+  <div className="create-field">
+    <label>Description</label>
+    <textarea
+      required
+      value={formData.description}
+      onChange={(e) =>
+        setFormData({ ...formData, description: e.target.value })
+      }
+    />
+  </div>
 
-            <div className="create-field">
-              <label>Category</label>
-              <select
-                required
-                value={formData.categoryId}
-                onChange={(e) =>
-                  setFormData({ ...formData, categoryId: e.target.value })
-                }
-              >
-                <option value="">Select category</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <div className="create-field">
+    <label>Category</label>
+    <select
+      required
+      value={formData.categoryId}
+      onChange={(e) =>
+        setFormData({ ...formData, categoryId: e.target.value })
+      }
+    >
+      <option value="">Select category</option>
+      {categories.map((c) => (
+        <option key={c.id} value={c.id}>{c.name}</option>
+      ))}
+    </select>
+  </div>
 
-            <div className="create-field">
-              <label>City</label>
-              <select
-                required
-                value={formData.cityId}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    cityId: e.target.value,
-                    zoneId: "",
-                    localityId: "",
-                  });
-                  fetchZones(e.target.value);
-                }}
-              >
-                <option value="">Select city</option>
-                {cities.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <div className="create-field">
+    <label>City</label>
+    <select
+      required
+      value={formData.cityId}
+      onChange={(e) => {
+        setFormData({
+          ...formData,
+          cityId: e.target.value,
+          zoneId: "",
+          localityId: "",
+        });
+        fetchZones(e.target.value);
+      }}
+    >
+      <option value="">Select city</option>
+      {cities.map((c) => (
+        <option key={c.id} value={c.id}>{c.name}</option>
+      ))}
+    </select>
+  </div>
 
-            <div className="create-field">
-              <label>Zone</label>
-              <select
-                required
-                value={formData.zoneId}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    zoneId: e.target.value,
-                    localityId: "",
-                  });
-                  fetchLocalities(e.target.value);
-                }}
-              >
-                <option value="">Select zone</option>
-                {zones.map((z) => (
-                  <option key={z.id} value={z.id}>
-                    {z.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <div className="create-field">
+    <label>Zone</label>
+    <select
+      required
+      value={formData.zoneId}
+      onChange={(e) => {
+        setFormData({
+          ...formData,
+          zoneId: e.target.value,
+          localityId: "",
+        });
+        fetchLocalities(e.target.value);
+      }}
+    >
+      <option value="">Select zone</option>
+      {zones.map((z) => (
+        <option key={z.id} value={z.id}>{z.name}</option>
+      ))}
+    </select>
+  </div>
 
-            <div className="create-field">
-              <label>Locality</label>
-              <select
-                required
-                value={formData.localityId}
-                onChange={(e) =>
-                  setFormData({ ...formData, localityId: e.target.value })
-                }
-              >
-                <option value="">Select locality</option>
-                {localities.map((l) => (
-                  <option key={l.id} value={l.id}>
-                    {l.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+  <div className="create-field">
+    <label>Locality</label>
+    <select
+      required
+      value={formData.localityId}
+      onChange={(e) =>
+        setFormData({ ...formData, localityId: e.target.value })
+      }
+    >
+      <option value="">Select locality</option>
+      {localities.map((l) => (
+        <option key={l.id} value={l.id}>{l.name}</option>
+      ))}
+    </select>
+  </div>
 
-            <div className="create-field">
-              <label>Attach photo or video (optional)</label>
-              <input
-                type="file"
-                accept="image/*,video/*"
-                onChange={(e) => setFile(e.target.files[0])}
-              />
-            </div>
+  <div className="create-field">
+    <label>Attach photos or videos</label>
+    <input
+      type="file"
+      accept="image/*,video/*"
+      multiple
+      onChange={(e) => setFiles(Array.from(e.target.files))}
+    />
 
-            <div className="create-actions">
-              <button className="create-submit" disabled={loading}>
-                {loading ? "Submitting..." : "Submit issue"}
-              </button>
-            </div>
-          </form>
+    {files.length > 0 && (
+      <div className="create-previews">
+        {files.map((file, idx) => (
+          <div key={idx} className="preview-item">
+            {file.type.startsWith("image") ? (
+              <img src={URL.createObjectURL(file)} alt="" />
+            ) : (
+              <video src={URL.createObjectURL(file)} />
+            )}
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <div className="create-actions">
+    <button className="create-submit" disabled={loading}>
+      {loading ? "Submitting..." : "Submit issue"}
+    </button>
+  </div>
+</form>
+
         </div>
       </div>
     </div>

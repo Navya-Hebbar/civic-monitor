@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import CommentsSection from "./CommentsSection";
 import { FaArrowUp, FaRegComment } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
 import "./IssueCard.css";
 
 const IssueCard = ({ issue }) => {
@@ -56,6 +58,19 @@ const IssueCard = ({ issue }) => {
       setUpvoteLoading(false);
     }
   };
+/* ---------------- MEDIA ---------------- */
+  const [activeMedia, setActiveMedia] = useState(0);
+
+const totalMedia = issue.media?.length || 0;
+
+const nextMedia = () => {
+  setActiveMedia((p) => (p + 1) % totalMedia);
+};
+
+const prevMedia = () => {
+  setActiveMedia((p) => (p - 1 + totalMedia) % totalMedia);
+};
+
 
   return (
     <div className="issue-card">
@@ -108,13 +123,45 @@ const IssueCard = ({ issue }) => {
       </div>
 
       {/* MEDIA */}
-      {issue.media?.length > 0 && (
-        <div className="issue-media">
-          {issue.media.map((m, idx) => (
-            <img key={idx} src={m.url} alt="Issue media" />
-          ))}
-        </div>
-      )}
+        {issue.media?.length > 0 && (
+          <div className="issue-media-slider">
+            <div
+              className="issue-media-track"
+              style={{ transform: `translateX(-${activeMedia * 100}%)` }}
+            >
+              {issue.media.map((m, idx) => (
+                <div key={idx} className="issue-media-item">
+                  {m.type === "VIDEO" ? (
+                    <video src={m.url} controls />
+                  ) : (
+                    <img src={m.url} alt="Issue media" />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {totalMedia > 1 && (
+              <>
+                <button className="media-nav left" onClick={prevMedia}>
+                  <FaChevronLeft />
+                </button>
+                <button className="media-nav right" onClick={nextMedia}>
+                  <FaChevronRight />
+                </button>
+
+                <div className="media-dots">
+                  {issue.media.map((_, i) => (
+                    <span
+                      key={i}
+                      className={`dot ${i === activeMedia ? "active" : ""}`}
+                      onClick={() => setActiveMedia(i)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
       {/* STATS */}
       <div className="issue-stats">

@@ -86,6 +86,82 @@
   border-bottom: 1px solid #e5e7eb;
 }
 
+/* MEDIA SLIDER */
+/* MEDIA SLIDER */
+.issue-media-slider {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.issue-media-track {
+  display: flex;
+  transition: transform 0.3s ease;
+}
+
+.issue-media-item {
+  min-width: 100%;
+  background: #fff;
+}
+
+/* IMAGE */
+.issue-media-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* VIDEO */
+.issue-media-item video {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: #000;
+}
+
+/* NAV BUTTONS */
+.media-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.media-nav.left { left: 8px; }
+.media-nav.right { right: 8px; }
+
+/* DOTS */
+.media-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.media-dots .dot {
+  width: 6px;
+  height: 6px;
+  background: #d1d5db;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.media-dots .dot.active {
+  background: #0a66c2;
+}
+
+
 /* STATS */
 
 .issue-stats {
