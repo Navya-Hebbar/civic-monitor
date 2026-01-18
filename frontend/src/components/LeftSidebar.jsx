@@ -5,6 +5,7 @@ import api from "../api/axios";
 import "./LeftSidebar.css";
 
 const STATUSES = ["OPEN", "IN_PROGRESS", "CLOSED"];
+const CACHE_KEY = "my_issues_sidebar";
 
 const LeftSidebar = () => {
   const { user } = useAuth();
@@ -15,6 +16,25 @@ const LeftSidebar = () => {
     IN_PROGRESS: [],
     CLOSED: [],
   });
+
+  const [hasMore, setHasMore] = useState({
+    OPEN: false,
+    IN_PROGRESS: false,
+    CLOSED: false,
+  });
+
+  /* ---------------- LOAD FROM CACHE FIRST ---------------- */
+
+  useEffect(() => {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      setMyIssues(parsed.myIssues);
+      setHasMore(parsed.hasMore);
+    }
+  }, []);
+
+  /* ---------------- FETCH FROM API ---------------- */
 
   useEffect(() => {
     if (!user) return;
@@ -39,19 +59,31 @@ const LeftSidebar = () => {
           }
         });
 
-        // sort by upvotes (descending) and keep top 3
+        const limited = {};
+        const more = {};
+
         STATUSES.forEach((status) => {
-          grouped[status] = grouped[status]
-            .sort(
-              (a, b) =>
-                (b.upvoteCount ?? 0) - (a.upvoteCount ?? 0)
-            )
-            .slice(0, 3);
+          const sorted = grouped[status].sort(
+            (a, b) => (b.upvotes ?? 0) - (a.upvotes ?? 0)
+          );
+
+          limited[status] = sorted.slice(0, 3);
+          more[status] = sorted.length > 3;
         });
 
-        setMyIssues(grouped);
+        setMyIssues(limited);
+        setHasMore(more);
+
+        // cache for instant load next time
+        localStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify({
+            myIssues: limited,
+            hasMore: more,
+          })
+        );
       } catch {
-        // sidebar must never break app
+        // sidebar must NEVER break app
       }
     };
 
@@ -62,6 +94,7 @@ const LeftSidebar = () => {
 
   return (
     <aside className="left-sidebar">
+
       {/* PROFILE CARD */}
       <div className="sidebar-card">
         <div className="sidebar-cover" />
@@ -73,6 +106,7 @@ const LeftSidebar = () => {
               <span>{user.fullName?.[0]?.toUpperCase()}</span>
             )}
           </div>
+
           <h3 className="sidebar-name">{user.fullName}</h3>
           <p className="sidebar-email">{user.email}</p>
           <p className="sidebar-location">
@@ -87,7 +121,10 @@ const LeftSidebar = () => {
 
         {STATUSES.map((status) => (
           <div key={status} className="sidebar-issue-group">
-            <div className="sidebar-issue-status">{status.replace("_", " ")}</div>
+
+            <div className="sidebar-issue-status">
+              {status.replace("_", " ")}
+            </div>
 
             {myIssues[status].length === 0 ? (
               <div className="sidebar-empty">No issues</div>
@@ -96,19 +133,21 @@ const LeftSidebar = () => {
                 <div
                   key={issue.id}
                   className="sidebar-issue-item"
-                  onClick={() => navigate(`/profile?issue=${issue.id}`)}
+                  onClick={() =>
+                    navigate(`/profile?issue=${issue.id}`)
+                  }
                 >
                   <span className="sidebar-issue-title">
                     {issue.title}
                   </span>
                   <span className="sidebar-issue-upvotes">
-                    ↑ {issue.upvoteCount ?? 0}
+                    ↑ {issue.upvotes ?? 0}
                   </span>
                 </div>
               ))
             )}
 
-            {myIssues[status].length === 3 && (
+            {hasMore[status] && (
               <div
                 className="sidebar-view-more"
                 onClick={() =>
@@ -124,10 +163,13 @@ const LeftSidebar = () => {
 
       {/* SHORTCUTS */}
       <div className="sidebar-card sidebar-links">
-        <button onClick={() => navigate("/profile")}>Profile</button>
+        <button onClick={() => navigate("/profile")}>
+          Profile
+        </button>
         <button disabled>Saved items</button>
         <button disabled>Settings</button>
       </div>
+
     </aside>
   );
 };

@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import "./Navbar.css";
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuth(); // ✅ single source of truth
   const navigate = useNavigate();
 
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
   const handleLogout = async () => {
-    await logout();
-    navigate("/login");
+    await logout();        // ✅ let AuthContext handle everything
+    navigate("/login");    // ✅ redirect
   };
 
   // Close dropdown when clicking outside
@@ -24,7 +24,8 @@ const Navbar = () => {
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
@@ -61,12 +62,8 @@ const Navbar = () => {
                   <button onClick={() => navigate("/profile")}>
                     Profile
                   </button>
-                  <button onClick={() => navigate("/account")}>
-                    Account
-                  </button>
-                  <button onClick={() => navigate("/settings")}>
-                    Settings
-                  </button>
+                  <button disabled>Account</button>
+                  <button disabled>Settings</button>
                 </div>
 
                 <div className="profile-divider" />

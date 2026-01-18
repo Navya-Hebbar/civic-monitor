@@ -5,28 +5,30 @@ import { FaArrowUp, FaRegComment } from "react-icons/fa";
 import "./IssueCard.css";
 
 const IssueCard = ({ issue }) => {
-  const [upvoteCount, setUpvoteCount] = useState(issue.upvoteCount ?? 0);
-  const [hasUpvoted, setHasUpvoted] = useState(issue.hasUpvoted ?? false);
-  const [loading, setLoading] = useState(false);
+  const [upvoteCount, setUpvoteCount] = useState(issue.upvotes ?? 0);
+  const [commentCount, setCommentCount] = useState(issue.comments ?? 0);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
+  const [upvoteLoading, setUpvoteLoading] = useState(false);
 
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentsLoaded, setCommentsLoaded] = useState(false);
 
   useEffect(() => {
-    setUpvoteCount(issue.upvoteCount ?? 0);
-    setHasUpvoted(issue.hasUpvoted ?? false);
-  }, [issue.upvoteCount, issue.hasUpvoted]);
+    setUpvoteCount(issue.upvotes ?? 0);
+    setCommentCount(issue.comments ?? 0);
+  }, [issue.upvotes, issue.comments]);
+
+  /* ---------------- COMMENTS ---------------- */
 
   const prefetchComments = async () => {
     if (commentsLoaded) return;
 
     try {
-      const { data } = await api.get(
-        `/issues/${issue.id}/comments`,
-        { withCredentials: true }
-      );
-      setComments(Array.isArray(data) ? data : []);
+      const { data } = await api.get(`/issues/${issue.id}/comments`);
+      const list = Array.isArray(data) ? data : [];
+      setComments(list);
+      setCommentCount(list.length);
     } catch {
       setComments([]);
     } finally {
@@ -34,16 +36,15 @@ const IssueCard = ({ issue }) => {
     }
   };
 
+  /* ---------------- UPVOTE ---------------- */
+
   const handleUpvote = async () => {
-    if (loading) return;
+    if (upvoteLoading) return;
 
     try {
-      setLoading(true);
-      await api.post(
-        `/issues/${issue.id}/upvote`,
-        {},
-        { withCredentials: true }
-      );
+      setUpvoteLoading(true);
+
+      await api.post(`/issues/${issue.id}/upvote`);
 
       setHasUpvoted((p) => !p);
       setUpvoteCount((p) =>
@@ -52,7 +53,7 @@ const IssueCard = ({ issue }) => {
     } catch (err) {
       console.error("Upvote failed", err);
     } finally {
-      setLoading(false);
+      setUpvoteLoading(false);
     }
   };
 
@@ -61,14 +62,21 @@ const IssueCard = ({ issue }) => {
 
       {/* HEADER */}
       <div className="issue-header">
-        <div className="issue-avatar">
-          {issue.postedBy?.name?.[0]?.toUpperCase()}
-        </div>
+          <div className="issue-avatar">
+            {issue.postedBy?.profilePhotoUrl || issue.postedBy?.avatar ? (
+              <img
+                src={issue.postedBy.profilePhotoUrl || issue.postedBy.avatar}
+                alt={issue.postedBy.name}
+              />
+            ) : (
+              <span>
+                {issue.postedBy?.name?.[0]?.toUpperCase()}
+              </span>
+            )}
+          </div>
 
         <div className="issue-meta">
-          <div className="issue-author">
-            {issue.postedBy?.name}
-          </div>
+          <div className="issue-author">{issue.postedBy?.name}</div>
           <div className="issue-submeta">
             {issue.locality} •{" "}
             {new Date(issue.createdAt).toLocaleDateString()}
@@ -83,6 +91,20 @@ const IssueCard = ({ issue }) => {
       {/* CONTENT */}
       <div className="issue-content">
         <p className="issue-title">{issue.title}</p>
+
+        <div className="issue-tags">
+          <span className="issue-tag">{issue.category}</span>
+          <span className="issue-sep">•</span>
+          <span className="issue-tag">{issue.department}</span>
+          <span className="issue-sep">•</span>
+          <span className="issue-tag">{issue.locality}</span>
+        </div>
+
+        {issue.description && (
+          <p className="issue-description">
+            {issue.description}
+          </p>
+        )}
       </div>
 
       {/* MEDIA */}
@@ -97,7 +119,7 @@ const IssueCard = ({ issue }) => {
       {/* STATS */}
       <div className="issue-stats">
         <span>{upvoteCount} upvotes</span>
-        <span>{comments.length} comments</span>
+        <span>{commentCount} comments</span>
       </div>
 
       {/* ACTIONS */}
@@ -106,8 +128,10 @@ const IssueCard = ({ issue }) => {
           type="button"
           className={hasUpvoted ? "upvoted" : ""}
           onClick={handleUpvote}
+          disabled={upvoteLoading}
         >
-          <FaArrowUp /> {hasUpvoted ? "Upvoted" : "Upvote"}
+          <FaArrowUp />
+          {hasUpvoted ? "Upvoted" : "Upvote"}
         </button>
 
         <button
@@ -118,15 +142,20 @@ const IssueCard = ({ issue }) => {
             setShowComments((p) => !p);
           }}
         >
-          <FaRegComment /> Comment
+          <FaRegComment />
+          Comment
         </button>
       </div>
 
+      {/* COMMENTS INLINE */}
       {showComments && (
         <CommentsSection
           issueId={issue.id}
           comments={comments}
-          setComments={setComments}
+          setComments={(c) => {
+            setComments(c);
+            setCommentCount(c.length);
+          }}
         />
       )}
     </div>

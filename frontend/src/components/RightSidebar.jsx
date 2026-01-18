@@ -2,11 +2,17 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import "./RightSidebar.css";
 
+const REFRESH_INTERVAL = 15000; // 15 seconds (safe + responsive)
+
 const RightSidebar = () => {
   const [trending, setTrending] = useState([]);
 
   useEffect(() => {
     fetchTrending();
+
+    // ✅ auto-refresh trending (LinkedIn-style)
+    const interval = setInterval(fetchTrending, REFRESH_INTERVAL);
+    return () => clearInterval(interval);
   }, []);
 
   const fetchTrending = async () => {
@@ -18,7 +24,7 @@ const RightSidebar = () => {
             .map((i) => ({
               id: i.id,
               title: i.title,
-              upvotes: i?._count?.upvotes ?? 0,
+              upvotes: i.upvotes ?? 0, // ✅ correct field
             }))
             .sort((a, b) => b.upvotes - a.upvotes)
             .slice(0, 5)
@@ -32,7 +38,8 @@ const RightSidebar = () => {
 
   return (
     <aside className="right-sidebar">
-      {/* Trending Section */}
+
+      {/* TRENDING */}
       <div className="right-card">
         <div className="right-card-header">
           Trending Issues
@@ -46,7 +53,8 @@ const RightSidebar = () => {
           {trending.map((item, idx) => (
             <li key={item.id} className="trending-item">
               <span className="trending-rank">{idx + 1}</span>
-              <div>
+
+              <div className="trending-body">
                 <p className="trending-title">{item.title}</p>
                 <p className="trending-meta">
                   {item.upvotes} upvotes
@@ -57,7 +65,7 @@ const RightSidebar = () => {
         </ul>
       </div>
 
-      {/* Advertisement */}
+      {/* AD */}
       <div className="right-card">
         <div className="right-card-header">
           Sponsored

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import api from "../../api/axios";
+import authImage from "../../assets/authimage.png";
 import "./Auth.css";
 
 const Signup = () => {
@@ -53,73 +54,71 @@ const Signup = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
-        <h1 className="auth-title">Create account</h1>
-        <p className="auth-subtitle">
-          Join your city’s civic monitoring platform
-        </p>
+    <div className="auth-root">
+      {/* HEADER */}
+      <header className="auth-header">
+        <div className="auth-logo">CivicSense</div>
+        <div className="auth-actions">
+          <Link to="/login">Sign in</Link>
+          <Link to="/signup" className="primary">Register</Link>
+        </div>
+      </header>
 
-        {error && <div className="auth-error">{error}</div>}
+      {/* MAIN */}
+      <main className="auth-main">
+        {/* LEFT FORM */}
+        <div className="auth-left auth-scroll">
+          <h1>Join your civic community</h1>
+          <p className="auth-subline">
+            Report issues, track progress, and improve your city.
+          </p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="auth-field">
-            <label>Full name</label>
+          {error && <div className="auth-error">{error}</div>}
+
+          <form onSubmit={handleSubmit}>
             <input
+              placeholder="Full name"
               required
               value={form.fullName}
               onChange={(e) =>
                 setForm({ ...form, fullName: e.target.value })
               }
             />
-          </div>
 
-          <div className="auth-field">
-            <label>Email</label>
             <input
               type="email"
+              placeholder="Email address"
               required
               value={form.email}
               onChange={(e) =>
                 setForm({ ...form, email: e.target.value })
               }
             />
-          </div>
 
-          <div className="auth-field">
-            <label>Password</label>
             <input
               type="password"
+              placeholder="Password"
               required
               value={form.password}
               onChange={(e) =>
                 setForm({ ...form, password: e.target.value })
               }
             />
-          </div>
 
-          <div className="auth-field">
-            <label>City</label>
             <select required value={form.cityId} onChange={(e) => handleCity(e.target.value)}>
               <option value="">Select city</option>
               {geo.cities.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-          </div>
 
-          <div className="auth-field">
-            <label>Zone</label>
             <select required value={form.zoneId} onChange={(e) => handleZone(e.target.value)}>
               <option value="">Select zone</option>
               {geo.zones.map((z) => (
                 <option key={z.id} value={z.id}>{z.name}</option>
               ))}
             </select>
-          </div>
 
-          <div className="auth-field">
-            <label>Locality</label>
             <select
               required
               value={form.localityId}
@@ -132,17 +131,22 @@ const Signup = () => {
                 <option key={l.id} value={l.id}>{l.name}</option>
               ))}
             </select>
-          </div>
 
-          <button className="auth-button" disabled={loading}>
-            {loading ? "Creating..." : "Create account"}
-          </button>
-        </form>
+            <button disabled={loading}>
+              {loading ? "Creating account..." : "Create account"}
+            </button>
+          </form>
 
-        <div className="auth-footer">
-          Already have an account? <Link to="/login">Sign in</Link>
+          <p className="auth-footer">
+            Already have an account? <Link to="/login">Sign in</Link>
+          </p>
         </div>
-      </div>
+
+        {/* RIGHT IMAGE */}
+        {/* <div className="auth-right">
+          <img src={authImage} alt="Community illustration" />
+        </div> */}
+      </main>
     </div>
   );
 };
