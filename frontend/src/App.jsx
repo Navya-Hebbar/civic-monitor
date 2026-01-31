@@ -25,7 +25,9 @@ function App() {
   const authPages = ["/login", "/signup"];
   const showNavbar = user && !authPages.includes(location.pathname);
 
-  if (loading) return null;
+  if (loading) {
+    return <div style={{ width: "100%", height: "100vh" }}></div>; // Return empty div instead of null
+  }
 
   return (
     <div className="app-shell">
