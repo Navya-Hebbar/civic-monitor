@@ -4,8 +4,9 @@ import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import "./AdminIssuePage.css";
 
+/* 🔥 CHANGED: REJECTED REMOVED */
 const STATUS_TRANSITIONS = {
-  OPEN: ["IN_PROGRESS", "REJECTED"],
+  OPEN: ["IN_PROGRESS"],
   IN_PROGRESS: ["RESOLVED_PENDING_USER"]
 };
 
@@ -14,8 +15,7 @@ const STATUS_HELP = {
   IN_PROGRESS: "Work has started on this issue.",
   RESOLVED_PENDING_USER:
     "Issue resolved by admin. Awaiting citizen verification.",
-  CLOSED: "Citizen confirmed resolution.",
-  REJECTED: "Issue marked invalid or duplicate."
+  CLOSED: "Citizen confirmed resolution."
 };
 
 const AdminIssuePage = () => {
@@ -70,10 +70,20 @@ const AdminIssuePage = () => {
         remarks: remarks.trim()
       });
 
-      for (const file of files) {
-        const fd = new FormData();
-        fd.append("file", file);
-        await api.patch(`/admin/issues/${issueId}/media`, fd);
+      if (
+        nextStatus === "RESOLVED_PENDING_USER" &&
+        files.length > 0
+      ) {
+        for (const file of files) {
+          const fd = new FormData();
+          fd.append("file", file);
+
+          await api.post(
+            `/admin/issues/${issueId}/proof`,
+            fd,
+            { headers: { "Content-Type": "multipart/form-data" } }
+          );
+        }
       }
 
       setNextStatus("");
@@ -82,7 +92,8 @@ const AdminIssuePage = () => {
 
       await fetchAll();
     } catch (err) {
-      alert(err.response?.data?.message || "Status update failed");
+      console.error(err);
+      alert(err.response?.data?.message || "Update failed");
     } finally {
       setUpdating(false);
     }
@@ -97,7 +108,6 @@ const AdminIssuePage = () => {
     <div className="ai-page">
       <section className="ai-main">
 
-        {/* HEADER */}
         <div className="ai-header">
           <h1 className="ai-title">{issue.title}</h1>
           <span className={`ai-status ai-${issue.status.toLowerCase()}`}>
@@ -105,7 +115,6 @@ const AdminIssuePage = () => {
           </span>
         </div>
 
-        {/* META */}
         <div className="ai-meta">
           <span>{issue.category}</span>
           <span>•</span>
@@ -120,7 +129,6 @@ const AdminIssuePage = () => {
 
         <p className="ai-description">{issue.description}</p>
 
-        {/* MEDIA */}
         {issue.media?.length > 0 ? (
           <div className="ai-media">
             {issue.media.map((m, i) => (
@@ -131,7 +139,6 @@ const AdminIssuePage = () => {
           <div className="ai-no-media">No image has been provided</div>
         )}
 
-        {/* ADMIN UPDATE */}
         {assigned ? (
           allowedStatuses.length > 0 && (
             <div className="ai-admin-update">
@@ -197,10 +204,8 @@ const AdminIssuePage = () => {
             You are not assigned to this issue
           </div>
         )}
-
       </section>
 
-      {/* SIDEBAR */}
       <aside className="ai-sidebar">
         <div className="ai-stat-card">
           <span>Upvotes</span>

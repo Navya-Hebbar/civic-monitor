@@ -12,6 +12,7 @@ import AdminFeed from "./pages/admin/AdminFeed";
 import AdminIssuePage from "./pages/admin/AdminIssuePage";
 
 import Navbar from "./components/Navbar";
+import AlertsPage from "./pages/AlertsPage";
 import Profile from "./pages/profile/Profile";
 import EditProfile from "./pages/profile/EditProfile";
 import { ProtectedRoute } from "./components/ProtectedRoute";
@@ -24,7 +25,9 @@ function App() {
   const authPages = ["/login", "/signup"];
   const showNavbar = user && !authPages.includes(location.pathname);
 
-  if (loading) return null;
+  if (loading) {
+    return <div style={{ width: "100%", height: "100vh" }}></div>; // Return empty div instead of null
+  }
 
   return (
     <div className="app-shell">
@@ -93,6 +96,17 @@ function App() {
           path="/profile/edit"
           element={<ProtectedRoute><EditProfile /></ProtectedRoute>}
         />
+
+        {/* ALERTS */}
+        <Route
+        path="/alerts"
+        element={
+          <ProtectedRoute>
+            <AlertsPage />
+          </ProtectedRoute>
+        }
+        />
+
 
         {/* FALLBACK */}
         <Route

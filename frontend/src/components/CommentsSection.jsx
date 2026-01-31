@@ -1,9 +1,9 @@
 import { useState } from "react";
 import api from "../api/axios";
-import { FaRegCommentDots, FaPaperPlane } from "react-icons/fa";
+import { FaRegCommentDots, FaPaperPlane, FaTimes } from "react-icons/fa";
 import "./CommentsSection.css";
 
-const CommentsSection = ({ issueId, comments, setComments }) => {
+const CommentsSection = ({ issueId, comments, setComments, onClose }) => {
   const [content, setContent] = useState("");
   const [posting, setPosting] = useState(false);
 
@@ -31,6 +31,12 @@ const CommentsSection = ({ issueId, comments, setComments }) => {
       ]);
 
       setContent("");
+      
+      // Auto-close comments after posting
+      setTimeout(() => {
+        if (onClose) onClose();
+      }, 1000);
+      
     } catch {
       console.error("Comment failed");
     } finally {
@@ -38,8 +44,21 @@ const CommentsSection = ({ issueId, comments, setComments }) => {
     }
   };
 
+  const handleClose = () => {
+    if (onClose) onClose();
+  };
+
   return (
     <div className="comments-wrapper">
+      {/* Header */}
+      <div className="comments-header">
+        <div className="header-left">
+          <h4>Comments ({comments.length})</h4>
+        </div>
+        <button className="close-comments-btn" onClick={handleClose} title="Close Comments">
+          <FaTimes />
+        </button>
+      </div>
 
       <div className="comments-list">
         {comments.length === 0 && (
@@ -70,11 +89,18 @@ const CommentsSection = ({ issueId, comments, setComments }) => {
           placeholder="Add a comment..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handlePost();
+            }
+          }}
         />
         <button
           type="button"
           onClick={handlePost}
           disabled={posting}
+          className="post-comment-btn"
         >
           <FaPaperPlane />
         </button>

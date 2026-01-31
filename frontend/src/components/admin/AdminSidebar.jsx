@@ -12,24 +12,28 @@ const AdminSidebar = ({ issues, activeStatus, setActiveStatus }) => {
 
   return (
     <aside className="admin-sidebar">
-      <h3 className="admin-sidebar-title">My Work</h3>
+      <div className="admin-sidebar-header">
+        <h3 className="admin-sidebar-title">My Work</h3>
+      </div>
 
-      {STATUSES.map((status) => (
-        <div
-          key={status}
-          className={`admin-sidebar-item ${
-            activeStatus === status ? "active" : ""
-          }`}
-          onClick={() =>
-            setActiveStatus(
-              activeStatus === status ? null : status
-            )
-          }
-        >
-          <span>{status.replace("_", " ")}</span>
-          <span className="count">{counts[status]}</span>
-        </div>
-      ))}
+      <div className="admin-sidebar-content">
+        {STATUSES.map((status) => (
+          <div
+            key={status}
+            className={`admin-sidebar-item ${
+              activeStatus === status ? "active" : ""
+            }`}
+            onClick={() =>
+              setActiveStatus(
+                activeStatus === status ? null : status
+              )
+            }
+          >
+            <span>{status.replace("_", " ")}</span>
+            <span className="count">{counts[status]}</span>
+          </div>
+        ))}
+      </div>
     </aside>
   );
 };

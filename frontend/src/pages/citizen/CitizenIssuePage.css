@@ -15,6 +15,39 @@
   gap: 20px;
 }
 
+/* PAGE HEADER WITH BACK BUTTON */
+.ci-page-header {
+  grid-column: 1 / -1;
+  margin-bottom: 8px;
+}
+
+.ci-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  width: fit-content;
+}
+
+.ci-back-btn:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  transform: translateX(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.ci-back-btn svg {
+  font-size: 16px;
+}
+
 /* MAIN ISSUE */
 .ci-main {
   background: #ffffff;
@@ -229,4 +262,27 @@
   .ci-container {
     grid-template-columns: 1fr;
   }
+}
+.ci-verify-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.ci-approve {
+  flex: 1;
+  background: #16a34a;
+  color: white;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+.ci-reject {
+  flex: 1;
+  background: #dc2626;
+  color: white;
+  font-weight: 600;
+  padding: 10px;
+  border-radius: 6px;
 }

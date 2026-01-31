@@ -4,7 +4,8 @@ import { useAuth } from "../context/AuthContext";
 import api from "../api/axios";
 import CommentsSection from "./CommentsSection";
 import {
-  FaArrowUp,
+  FaThumbsUp,
+  FaRegThumbsUp,
   FaRegComment,
   FaChevronLeft,
   FaChevronRight
@@ -153,8 +154,12 @@ const IssueCard = ({ issue }) => {
 
       {/* ACTIONS */}
       <div className="issue-actions">
-        <button onClick={handleUpvote} disabled={upvoteLoading}>
-          <FaArrowUp /> {hasUpvoted ? "Upvoted" : "Upvote"}
+        <button
+          onClick={handleUpvote}
+          disabled={upvoteLoading}
+          className={`upvote-button ${hasUpvoted ? 'upvoted' : ''}`}
+        >
+          {hasUpvoted ? <FaThumbsUp /> : <FaRegThumbsUp />} {hasUpvoted ? "Upvoted" : "Upvote"}
         </button>
 
         <button
@@ -177,6 +182,7 @@ const IssueCard = ({ issue }) => {
             setComments(c);
             setCommentCount(c.length);
           }}
+          onClose={() => setShowComments(false)}
         />
       )}
     </div>

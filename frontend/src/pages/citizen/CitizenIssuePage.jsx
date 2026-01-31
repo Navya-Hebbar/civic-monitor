@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { FaArrowLeft } from "react-icons/fa";
 import api from "../../api/axios";
 import Loader from "../../components/Loader";
 import CommentsSection from "../../components/CommentsSection";
+import ResponsivePageLayout from "../../components/ResponsivePageLayout";
 import "./CitizenIssuePage.css";
 
 const CitizenIssuePage = () => {
@@ -50,64 +52,73 @@ const CitizenIssuePage = () => {
   if (loading) return <Loader />;
   if (!issue) return <div className="issue-page">Issue not found</div>;
 
-return (
-  <div className="ci-page">
-    <div className="ci-container">
+  return (
+    <div className="ci-page-wrapper">
+      <ResponsivePageLayout
+        rightSidebar={
+          <aside className="ci-sidebar">
+            <div className="ci-stat">
+              <strong>{issue.upvotes}</strong>
+              <span>Upvotes</span>
+            </div>
 
-      <div className="ci-main">
-        <div className="ci-header">
-          <h1 className="ci-title">{issue.title}</h1>
-          <span className={`ci-status ci-${issue.status.toLowerCase()}`}>
-            {issue.status.replaceAll("_", " ")}
-          </span>
-        </div>
-
-        <div className="ci-meta">
-          {issue.category} • {issue.department} • {issue.locality}
-        </div>
-
-        <p className="ci-description">{issue.description}</p>
-
-        {issue.media?.length > 0 ? (
-          <div className="ci-media">
-            {issue.media.map((m, i) => (
-              <img key={i} src={m.url} alt="" />
-            ))}
-          </div>
-        ) : (
-          <div className="ci-no-media">No images provided</div>
-        )}
-
-        {issue.status === "RESOLVED_PENDING_USER" && (
-          <div className="ci-verify">
-            <h3>Verify Resolution</h3>
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Was the issue resolved properly?"
+            <CommentsSection
+              issueId={issueId}
+              comments={comments}
+              setComments={setComments}
             />
-            <button disabled={verifying} onClick={verifyIssue}>
-              {verifying ? "Submitting..." : "Confirm Resolution"}
+          </aside>
+        }
+      >
+        <div className="ci-container-responsive"> {/* Renamed to avoid grid conflict if I keep CSS, or just specific class */}
+          {/* Back button at the top */}
+          <div className="ci-page-header">
+            <button className="ci-back-btn" onClick={() => navigate('/explore')}>
+              <FaArrowLeft /> Back to Explore
             </button>
           </div>
-        )}
-      </div>
 
-      <aside className="ci-sidebar">
-        <div className="ci-stat">
-          <strong>{issue.upvotes}</strong>
-          <span>Upvotes</span>
+          <div className="ci-main">
+            <div className="ci-header">
+              <h1 className="ci-title">{issue.title}</h1>
+              <span className={`ci-status ci-${issue.status.toLowerCase()}`}>
+                {issue.status.replaceAll("_", " ")}
+              </span>
+            </div>
+
+            <div className="ci-meta">
+              {issue.category} • {issue.department} • {issue.locality}
+            </div>
+
+            <p className="ci-description">{issue.description}</p>
+
+            {issue.media?.length > 0 ? (
+              <div className="ci-media">
+                {issue.media.map((m, i) => (
+                  <img key={i} src={m.url} alt="" />
+                ))}
+              </div>
+            ) : (
+              <div className="ci-no-media">No images provided</div>
+            )}
+
+            {issue.status === "RESOLVED_PENDING_USER" && (
+              <div className="ci-verify">
+                <h3>Verify Resolution</h3>
+                <textarea
+                  value={feedback}
+                  onChange={(e) => setFeedback(e.target.value)}
+                  placeholder="Was the issue resolved properly?"
+                />
+                <button disabled={verifying} onClick={verifyIssue}>
+                  {verifying ? "Submitting..." : "Confirm Resolution"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-
-        <CommentsSection
-          issueId={issueId}
-          comments={comments}
-          setComments={setComments}
-        />
-      </aside>
-
+      </ResponsivePageLayout>
     </div>
-  </div>
-);
+  );
 };
 export default CitizenIssuePage;

@@ -34,6 +34,9 @@ export const AuthProvider = ({ children }) => {
     } catch {}
 
     localStorage.removeItem("user");
+    localStorage.removeItem("explore_issues_cache");
+    localStorage.removeItem("my_issues_sidebar"); // already used
+    localStorage.removeItem("profile_cache"); // if exists
     setUser(null);
   };
 
