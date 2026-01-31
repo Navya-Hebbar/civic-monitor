@@ -154,8 +154,8 @@ const IssueCard = ({ issue }) => {
 
       {/* ACTIONS */}
       <div className="issue-actions">
-        <button 
-          onClick={handleUpvote} 
+        <button
+          onClick={handleUpvote}
           disabled={upvoteLoading}
           className={`upvote-button ${hasUpvoted ? 'upvoted' : ''}`}
         >

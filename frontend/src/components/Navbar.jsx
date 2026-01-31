@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {Search, Bell, UserCircle, AlertCircle, ClipboardList, Home} from "lucide-react";
+import { Search, Bell, UserCircle, AlertCircle, ClipboardList, Home } from "lucide-react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquarePlus } from "@fortawesome/free-solid-svg-icons";
@@ -83,11 +83,10 @@ const Navbar = () => {
               <Link
                 key={item.href}
                 to={item.href}
-                className={`${styles.navItem} ${
-                  location.pathname === item.href
+                className={`${styles.navItem} ${location.pathname === item.href
                     ? styles.navItemActive
                     : ""
-                }`}
+                  }`}
               >
                 <div className={styles.navItemIcon}>
                   {React.cloneElement(item.icon, {
@@ -116,20 +115,26 @@ const Navbar = () => {
               {isProfileOpen && (
                 <div className={styles.profileDropdown}>
                   <div className={styles.profileHeader}>
-                    <strong>{user?.fullName}</strong>
-                    <small>{user?.email}</small>
+                    <div className={styles.profileName}>{user?.fullName}</div>
+                    <div className={styles.profileEmail}>{user?.email}</div>
                   </div>
 
-                  <Link
-                    to="/profile"
-                    onClick={() => setIsProfileOpen(false)}
-                  >
-                    Profile
-                  </Link>
+                  <div className={styles.profileMenu}>
+                    <Link
+                      to="/profile"
+                      className={styles.profileMenuItem}
+                      onClick={() => setIsProfileOpen(false)}
+                    >
+                      Profile
+                    </Link>
 
-                  <button onClick={handleLogout} className={styles.logout}>
-                    Sign out
-                  </button>
+                    <button
+                      onClick={handleLogout}
+                      className={`${styles.profileMenuItem} ${styles.profileLogout}`}
+                    >
+                      Sign out
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -143,11 +148,10 @@ const Navbar = () => {
           <Link
             key={item.href}
             to={item.href}
-            className={`${styles.mobileNavItem} ${
-              location.pathname === item.href
+            className={`${styles.mobileNavItem} ${location.pathname === item.href
                 ? styles.mobileNavItemActive
                 : ""
-            }`}
+              }`}
           >
             {item.icon}
             <span>{item.label}</span>
@@ -156,11 +160,10 @@ const Navbar = () => {
 
         <Link
           to="/profile"
-          className={`${styles.mobileNavItem} ${
-            location.pathname === "/profile"
+          className={`${styles.mobileNavItem} ${location.pathname === "/profile"
               ? styles.mobileNavItemActive
               : ""
-          }`}
+            }`}
         >
           <UserCircle />
           <span>Profile</span>
